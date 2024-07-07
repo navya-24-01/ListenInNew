@@ -85,11 +85,11 @@ if uploaded_file is not None:
         ]
 
         # Print the command for debugging
-        st.write("Running ffmpeg command:", " ".join(ffmpeg_command))
+        #st.write("Running ffmpeg command:", " ".join(ffmpeg_command))
 
         result = subprocess.run(ffmpeg_command, capture_output=True, text=True, bufsize=1048576)
-        st.write("FFmpeg stdout:", result.stdout)
-        st.write("FFmpeg stderr:", result.stderr)
+        #st.write("FFmpeg stdout:", result.stdout)
+        #st.write("FFmpeg stderr:", result.stderr)
 
         # Check if ffmpeg was successful
         if result.returncode != 0:
