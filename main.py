@@ -4,6 +4,7 @@ import cv2
 import moviepy.editor as mp
 from pydub import AudioSegment
 import uuid
+import tempfile
 from another_trial import (
     extract_frames, get_image_information, create_srt_file, 
     extract_audio_from_video, transcribe_audio, 
@@ -14,27 +15,22 @@ from another_trial import (
 st.title("Video Summary Generator")
 st.write("Upload a video file and get a summary of its content.")
 
-output_dir = "output_videos"
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
+# Create temporary directories
+temp_dir = tempfile.TemporaryDirectory()
+frames_directory = os.path.join(temp_dir.name, "uploaded_frames")
+output_directory = os.path.join(temp_dir.name, "output_videos")
+temp_audio_directory = os.path.join(temp_dir.name, "temp_audio")
+
+# Ensure directories exist
+for directory in [frames_directory, output_directory, temp_audio_directory]:
+    os.makedirs(directory, exist_ok=True)
 
 # File uploader
-uploaded_file = None
 uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "mov", "avi", "mkv"])
-
-# Directories to save frames, audio, and output video
-frames_directory = "/uploaded_frames"
-output_directory = "/output_videos"
-temp_directory = "/temp"
-
-# Create directories if they don't exist
-for directory in [frames_directory, output_directory, temp_directory]:
-    if not os.path.exists(directory):
-        os.makedirs(directory)
 
 if uploaded_file is not None:
     # Save the uploaded video to a temporary file
-    temp_video_path = os.path.join(temp_directory, uploaded_file.name)
+    temp_video_path = os.path.join(temp_audio_directory, uploaded_file.name)
     
     with open(temp_video_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
@@ -62,7 +58,7 @@ if uploaded_file is not None:
         
         text_transcribed = ""
         # Process audio
-        temp_audio_path = os.path.join(temp_directory, f"temp_audio_{uuid.uuid4()}.mp3")
+        temp_audio_path = os.path.join(temp_audio_directory, f"temp_audio_{uuid.uuid4()}.mp3")
         if extract_audio_from_video(temp_video_path, temp_audio_path) != "No audio track found in the video.":
             text_transcribed = transcribe_audio(temp_audio_path)
 
@@ -93,6 +89,5 @@ if uploaded_file is not None:
             os.remove(os.path.join(frames_directory, file))
         if temp_audio_path and os.path.exists(temp_audio_path):
             os.remove(temp_audio_path)
-
 else:
     st.write("Please upload a video file.")
