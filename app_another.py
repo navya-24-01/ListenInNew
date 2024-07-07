@@ -6,10 +6,18 @@ import moviepy.editor as mp
 from pydub import AudioSegment
 import uuid
 
-# Set up Streamlit
-st.title("Video Summary Generator")
-st.write("Upload a video file and get a summary of its content.")
 
+# Set up Streamlit
+st.title("📽️ Video Summary Generator")
+st.write("Upload a video file and get an audio transcription of its content.")
+
+# Foldable sidebar for settings and controls
+with st.sidebar:
+    st.markdown("""
+    ### ListenIn
+    ListenIn is an AI-powered tool that allows you to upload a video file and get a detailed summary of its content, including transcriptions and scene descriptions. Simply upload your video, and let ListenIn do the rest!
+    """)
+    
 # File uploader
 uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "mov", "avi", "mkv"])
 
