@@ -16,9 +16,16 @@ from another_trial import (
 ffmpeg_path = "ffmpeg"
 
 # Set up Streamlit
-st.title("Video Summary Generator")
-st.write("Upload a video file and get a summary of its content.")
+st.title("📽️ Video Summary Generator")
+st.write("Upload a video file and get an audio transcription of its content.")
 
+# Foldable sidebar for settings and controls
+with st.sidebar:
+    st.markdown("""
+    ### ListenIn
+    ListenIn is an AI-powered tool that allows you to upload a video file and get a detailed summary of its content, including transcriptions and scene descriptions. Simply upload your video, and let ListenIn do the rest!
+    """)
+ 
 # Create temporary directories
 temp_dir = tempfile.TemporaryDirectory()
 frames_directory = os.path.join(temp_dir.name, "uploaded_frames")
