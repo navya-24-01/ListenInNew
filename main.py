@@ -63,14 +63,19 @@ if uploaded_file is not None:
         text_transcribed = ""
         # Process audio
         temp_audio_path = os.path.join(temp_audio_directory, f"temp_audio_{uuid.uuid4()}.mp3")
-        if extract_audio_from_video(temp_video_path, temp_audio_path) != "No audio track found in the video.":
+        audio_extraction_result = extract_audio_from_video(temp_video_path, temp_audio_path)
+        if audio_extraction_result != "No audio track found in the video.":
             text_transcribed = transcribe_audio(temp_audio_path)
-
-        create_audio_from_descriptions(descriptions, text_transcribed, temp_audio_path)
+            create_audio_from_descriptions(descriptions, text_transcribed, temp_audio_path)
+        else:
+            temp_audio_path = None
 
         # Merge audio with video
         output_video_path = os.path.join(output_directory, f"output_video_with_audio_{video_name}.mp4")
-        merge_audio_with_video(temp_video_path, temp_audio_path, output_video_path)
+        if temp_audio_path:
+            merge_audio_with_video(temp_video_path, temp_audio_path, output_video_path)
+        else:
+            output_video_path = temp_video_path
         
         # Merge the SRT file with the video using ffmpeg
         final_output_path = os.path.join(output_directory, f"output_video_with_captions_{video_name}.mp4")
