@@ -4,7 +4,11 @@ import cv2
 import moviepy.editor as mp
 from pydub import AudioSegment
 import uuid
-from another_trial import extract_frames, get_image_information, create_srt_file, extract_audio_from_video, transcribe_audio, create_audio_from_descriptions, merge_audio_with_video
+from another_trial import (
+    extract_frames, get_image_information, create_srt_file, 
+    extract_audio_from_video, transcribe_audio, 
+    create_audio_from_descriptions, merge_audio_with_video
+)
 
 # Set up Streamlit
 st.title("Video Summary Generator")
@@ -36,6 +40,9 @@ if uploaded_file is not None:
     
     st.write(f"Uploaded {uploaded_file.name}")
 
+    # Initialize temp_audio_path with None
+    temp_audio_path = None
+
     try:
         # Extract frames
         video_clip = mp.VideoFileClip(temp_video_path)
@@ -51,7 +58,6 @@ if uploaded_file is not None:
         video_name = os.path.splitext(os.path.basename(temp_video_path))[0]
         output_srt_path = os.path.join(output_directory, f"video_captions_{video_name}.srt")
         create_srt_file(descriptions, output_srt_path, frame_rate)
-        
         
         text_transcribed = ""
         # Process audio
@@ -84,7 +90,7 @@ if uploaded_file is not None:
             os.remove(temp_video_path)
         for file in os.listdir(frames_directory):
             os.remove(os.path.join(frames_directory, file))
-        if os.path.exists(temp_audio_path):
+        if temp_audio_path and os.path.exists(temp_audio_path):
             os.remove(temp_audio_path)
 
 else:
