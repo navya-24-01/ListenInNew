@@ -12,6 +12,9 @@ from another_trial import (
     create_audio_from_descriptions, merge_audio_with_video
 )
 
+# Path to ffmpeg executable
+ffmpeg_path = "/usr/bin/ffmpeg"  # Replace with the actual path to ffmpeg
+
 # Set up Streamlit
 st.title("Video Summary Generator")
 st.write("Upload a video file and get a summary of its content.")
@@ -72,7 +75,7 @@ if uploaded_file is not None:
         # Merge the SRT file with the video using ffmpeg
         final_output_path = os.path.join(output_directory, f"output_video_with_captions_{video_name}.mp4")
         ffmpeg_command = [
-            'ffmpeg', '-i', output_video_path, '-vf', 
+            ffmpeg_path, '-i', output_video_path, '-vf', 
             f'subtitles={output_srt_path}:force_style=\'Fontsize=24\'', final_output_path
         ]
         subprocess.run(ffmpeg_command, check=True)
