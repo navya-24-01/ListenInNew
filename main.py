@@ -19,6 +19,7 @@ if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
 # File uploader
+uploaded_file = None
 uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "mov", "avi", "mkv"])
 
 # Directories to save frames, audio, and output video
