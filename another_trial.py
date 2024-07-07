@@ -1,23 +1,18 @@
-
-
 from langchain_openai import ChatOpenAI
 import base64
 import os
-from typing import List
-
 from gtts import gTTS
+import streamlit as st
 
+api_key = st.secrets["openai"]["api_key"]
 
 llm = ChatOpenAI(
     temperature=0,
     max_tokens=None,
     timeout=None,
     max_retries=2,
-    api_key="sk-proj-L8hAwiCGh9EuhwDNHiIXT3BlbkFJeneRXBwVVXcHoSWg9l2T",
+    api_key=api_key,
 )
-
-print(llm.invoke("Good mo"))
-
 
 def load_image(inputs: dict) -> dict:
     """Load image from file and encode it as base64."""
@@ -46,7 +41,7 @@ globals.set_debug(True)
 
 @chain
 def image_model(inputs: dict) -> str:
-    model = ChatOpenAI(temperature=0.5, max_tokens=1024, model="gpt-4o", api_key="sk-proj-L8hAwiCGh9EuhwDNHiIXT3BlbkFJeneRXBwVVXcHoSWg9l2T")
+    model = ChatOpenAI(temperature=0.5, max_tokens=1024, model="gpt-4o", api_key=api_key)
     msg = model.invoke(
         [HumanMessage(
             content=[

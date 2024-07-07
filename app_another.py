@@ -62,7 +62,7 @@ if uploaded_file is not None:
         merge_audio_with_video(temp_video_path, temp_audio_path, output_video_path)
         
         # Merge the SRT file with the video using ffmpeg
-        final_output_path = os.path.join(output_directory, "output_video_with_captions.mp4")
+        final_output_path = os.path.join(output_directory, f"output_video_with_captions_{video_name}.mp4")
         os.system(f'ffmpeg -i {output_video_path} -vf "subtitles={output_srt_path}:force_style=\'Fontsize=24\'" {final_output_path}')
 
         st.success("Summary generated!")
