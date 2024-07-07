@@ -5,6 +5,7 @@ import moviepy.editor as mp
 from pydub import AudioSegment
 import uuid
 import tempfile
+import subprocess
 from another_trial import (
     extract_frames, get_image_information, create_srt_file, 
     extract_audio_from_video, transcribe_audio, 
@@ -70,13 +71,19 @@ if uploaded_file is not None:
         
         # Merge the SRT file with the video using ffmpeg
         final_output_path = os.path.join(output_directory, f"output_video_with_captions_{video_name}.mp4")
-        ffmpeg_command = f'ffmpeg -i "{output_video_path}" -vf "subtitles={output_srt_path}:force_style=\'Fontsize=24\'" "{final_output_path}"'
-        os.system(ffmpeg_command)
+        ffmpeg_command = [
+            'ffmpeg', '-i', output_video_path, '-vf', 
+            f'subtitles={output_srt_path}:force_style=\'Fontsize=24\'', final_output_path
+        ]
+        subprocess.run(ffmpeg_command, check=True)
 
         st.success("Summary generated!")
         
-        # Display the output video with captions
-        st.video(final_output_path)
+        # Verify if the final output file exists before displaying
+        if os.path.exists(final_output_path):
+            st.video(final_output_path)
+        else:
+            st.error(f"Final output video not found at {final_output_path}")
 
     except Exception as e:
         st.error(f"An error occurred: {e}")
