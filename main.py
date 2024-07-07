@@ -80,12 +80,11 @@ if uploaded_file is not None:
         ]
 
         # Print the command for debugging
-        #st.write("Running ffmpeg command:", " ".join(ffmpeg_command))
+        st.write("Running ffmpeg command:", " ".join(ffmpeg_command))
 
-        result = subprocess.run(ffmpeg_command, capture_output=True, text=True)
-        #st.write("FFmpeg stdout:", result.stdout)
-        
-        #st.write("FFmpeg stderr:", result.stderr)
+        result = subprocess.run(ffmpeg_command, capture_output=True, text=True, bufsize=1048576)
+        st.write("FFmpeg stdout:", result.stdout)
+        st.write("FFmpeg stderr:", result.stderr)
 
         # Check if ffmpeg was successful
         if result.returncode != 0:
@@ -110,5 +109,6 @@ if uploaded_file is not None:
             os.remove(os.path.join(frames_directory, file))
         if temp_audio_path and os.path.exists(temp_audio_path):
             os.remove(temp_audio_path)
+        temp_dir.cleanup()
 else:
     st.write("Please upload a video file.")
