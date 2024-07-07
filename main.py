@@ -5,7 +5,6 @@ import moviepy.editor as mp
 from pydub import AudioSegment
 import uuid
 from another_trial import extract_frames, get_image_information, create_srt_file, extract_audio_from_video, transcribe_audio, create_audio_from_descriptions, merge_audio_with_video
-import subprocess
 
 # Set up Streamlit
 st.title("Video Summary Generator")
@@ -19,9 +18,9 @@ if not os.path.exists(output_dir):
 uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "mov", "avi", "mkv"])
 
 # Directories to save frames, audio, and output video
-frames_directory = "uploaded_frames"
-output_directory = "output_videos"
-temp_directory = "temp"
+frames_directory = "/uploaded_frames"
+output_directory = "/output_videos"
+temp_directory = "/temp"
 
 # Create directories if they don't exist
 for directory in [frames_directory, output_directory, temp_directory]:
@@ -53,12 +52,11 @@ if uploaded_file is not None:
         output_srt_path = os.path.join(output_directory, f"video_captions_{video_name}.srt")
         create_srt_file(descriptions, output_srt_path, frame_rate)
         
+        
         text_transcribed = ""
         # Process audio
         temp_audio_path = os.path.join(temp_directory, f"temp_audio_{uuid.uuid4()}.mp3")
-        audio_extraction_result = extract_audio_from_video(temp_video_path, temp_audio_path)
-        
-        if audio_extraction_result != "No audio track found in the video.":
+        if extract_audio_from_video(temp_video_path, temp_audio_path) != "No audio track found in the video.":
             text_transcribed = transcribe_audio(temp_audio_path)
 
         create_audio_from_descriptions(descriptions, text_transcribed, temp_audio_path)
@@ -70,12 +68,12 @@ if uploaded_file is not None:
         # Merge the SRT file with the video using ffmpeg
         final_output_path = os.path.join(output_directory, f"output_video_with_captions_{video_name}.mp4")
         ffmpeg_command = f'ffmpeg -i "{output_video_path}" -vf "subtitles={output_srt_path}:force_style=\'Fontsize=24\'" "{final_output_path}"'
-        process = subprocess.run(ffmpeg_command, shell=True, capture_output=True, text=True)
-        if process.returncode != 0:
-            st.error(f"FFmpeg error: {process.stderr}")
-        else:
-            st.success("Summary generated!")
-            st.video(final_output_path)
+        os.system(ffmpeg_command)
+
+        st.success("Summary generated!")
+        
+        # Display the output video with captions
+        st.video(final_output_path)
 
     except Exception as e:
         st.error(f"An error occurred: {e}")
