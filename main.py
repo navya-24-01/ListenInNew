@@ -12,8 +12,8 @@ from another_trial import (
     create_audio_from_descriptions, merge_audio_with_video
 )
 
-# Path to ffmpeg executable
-ffmpeg_path = "/usr/bin/ffmpeg"  # Replace with the actual path to ffmpeg
+# Path to ffmpeg executable (use just 'ffmpeg' to rely on the PATH)
+ffmpeg_path = "ffmpeg"
 
 # Set up Streamlit
 st.title("Video Summary Generator")
@@ -76,15 +76,16 @@ if uploaded_file is not None:
         final_output_path = os.path.join(output_directory, f"output_video_with_captions_{video_name}.mp4")
         ffmpeg_command = [
             ffmpeg_path, '-i', output_video_path, '-vf', 
-            f'subtitles={output_srt_path}:force_style=\'Fontsize=24\'', final_output_path
+            f"subtitles='{output_srt_path}:force_style=Fontsize=24'", final_output_path
         ]
 
         # Print the command for debugging
-        st.write("Running ffmpeg command:", " ".join(ffmpeg_command))
+        #st.write("Running ffmpeg command:", " ".join(ffmpeg_command))
 
         result = subprocess.run(ffmpeg_command, capture_output=True, text=True)
-        st.write("FFmpeg stdout:", result.stdout)
-        st.write("FFmpeg stderr:", result.stderr)
+        #st.write("FFmpeg stdout:", result.stdout)
+        
+        #st.write("FFmpeg stderr:", result.stderr)
 
         # Check if ffmpeg was successful
         if result.returncode != 0:
