@@ -78,7 +78,17 @@ if uploaded_file is not None:
             ffmpeg_path, '-i', output_video_path, '-vf', 
             f'subtitles={output_srt_path}:force_style=\'Fontsize=24\'', final_output_path
         ]
-        subprocess.run(ffmpeg_command, check=True)
+
+        # Print the command for debugging
+        st.write("Running ffmpeg command:", " ".join(ffmpeg_command))
+
+        result = subprocess.run(ffmpeg_command, capture_output=True, text=True)
+        st.write("FFmpeg stdout:", result.stdout)
+        st.write("FFmpeg stderr:", result.stderr)
+
+        # Check if ffmpeg was successful
+        if result.returncode != 0:
+            raise Exception(f"FFmpeg failed with return code {result.returncode}")
 
         st.success("Summary generated!")
         
