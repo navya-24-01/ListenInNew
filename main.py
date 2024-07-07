@@ -18,9 +18,9 @@ if not os.path.exists(output_dir):
 uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "mov", "avi", "mkv"])
 
 # Directories to save frames, audio, and output video
-frames_directory = "uploaded_frames"
-output_directory = "output_videos"
-temp_directory = "temp"
+frames_directory = "./uploaded_frames"
+output_directory = "./output_videos"
+temp_directory = "./temp"
 
 # Create directories if they don't exist
 for directory in [frames_directory, output_directory, temp_directory]:
