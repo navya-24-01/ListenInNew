@@ -1,14 +1,18 @@
 import os
 import streamlit as st
 import cv2
-from another_trial import *
 import moviepy.editor as mp
 from pydub import AudioSegment
 import uuid
+from another_trial import extract_frames, get_image_information, create_srt_file, extract_audio_from_video, transcribe_audio, create_audio_from_descriptions, merge_audio_with_video
 
 # Set up Streamlit
 st.title("Video Summary Generator")
 st.write("Upload a video file and get a summary of its content.")
+
+output_dir = "output_videos"
+if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
 
 # File uploader
 uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "mov", "avi", "mkv"])
@@ -53,7 +57,7 @@ if uploaded_file is not None:
         # Process audio
         temp_audio_path = os.path.join(temp_directory, f"temp_audio_{uuid.uuid4()}.mp3")
         if extract_audio_from_video(temp_video_path, temp_audio_path) != "No audio track found in the video.":
-            text_transcribed = transcribe_audio("original_audio.mp3")
+            text_transcribed = transcribe_audio(temp_audio_path)
 
         create_audio_from_descriptions(descriptions, text_transcribed, temp_audio_path)
 
@@ -63,7 +67,8 @@ if uploaded_file is not None:
         
         # Merge the SRT file with the video using ffmpeg
         final_output_path = os.path.join(output_directory, f"output_video_with_captions_{video_name}.mp4")
-        os.system(f'ffmpeg -i {output_video_path} -vf "subtitles={output_srt_path}:force_style=\'Fontsize=24\'" {final_output_path}')
+        ffmpeg_command = f'ffmpeg -i "{output_video_path}" -vf "subtitles={output_srt_path}:force_style=\'Fontsize=24\'" "{final_output_path}"'
+        os.system(ffmpeg_command)
 
         st.success("Summary generated!")
         
