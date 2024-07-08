@@ -1,7 +1,17 @@
-from langchain_openai import ChatOpenAI
 import base64
 import os
 from gtts import gTTS
+from langchain.chains import TransformChain
+from langchain_core.messages import HumanMessage
+from langchain_openai import ChatOpenAI
+from langchain import globals
+from langchain_core.runnables import chain
+from moviepy.editor import VideoFileClip, AudioFileClip
+import whisper
+import ssl
+import certifi
+from urllib.request import urlopen
+import cv2
 import streamlit as st
 
 api_key = st.secrets["openai"]["api_key"]
@@ -24,11 +34,6 @@ def load_image(inputs: dict) -> dict:
     image_base64 = encode_image(image_path)
     return {"image": image_base64}
 
-from langchain.chains import TransformChain
-from langchain_core.messages import HumanMessage
-from langchain_openai import ChatOpenAI
-from langchain import globals
-from langchain_core.runnables import chain
 
 load_image_chain = TransformChain(
     input_variables=["image_path"],
@@ -36,7 +41,6 @@ load_image_chain = TransformChain(
     transform=load_image
 )
 
-# Set verbose
 globals.set_debug(True)
 
 @chain
@@ -52,16 +56,14 @@ def image_model(inputs: dict) -> str:
     return msg.content if msg else ""
 
 def get_image_information(image_path: str) -> str:
-    vision_prompt = "Describe the image you see.limit to 15 words, cannot exceed! Reading the description should be limited to 5 seconds"
+    """Get image description using a model."""
+    vision_prompt = "Describe the image you see. Limit to 15 words, cannot exceed! Reading the description should be limited to 5 seconds."
     vision_chain = load_image_chain | image_model 
     response = vision_chain.invoke({'image_path': image_path, 'prompt': vision_prompt})
     return response
 
-
-
-from moviepy.editor import VideoFileClip
-
 def extract_audio_from_video(video_path, output_audio_path):
+    """Extract audio from video file."""
     video = VideoFileClip(video_path)
     audio = video.audio
     if audio is None:
@@ -69,17 +71,12 @@ def extract_audio_from_video(video_path, output_audio_path):
         return "No audio track found in the video."
     audio.write_audiofile(output_audio_path)
 
-
-import whisper
-import ssl
-import certifi
-from urllib.request import urlopen
-
 # Set SSL context globally
 context = ssl.create_default_context(cafile=certifi.where())
 ssl._create_default_https_context = lambda: context
 
 def transcribe_audio(audio_file_path):
+    """Transcribe audio to text using Whisper model."""
     try:
         model = whisper.load_model("base")
         result = model.transcribe(audio_file_path)
@@ -89,18 +86,8 @@ def transcribe_audio(audio_file_path):
         print(f"An error occurred during transcription: {e}")
         return f"Error: {e}"
 
-text_transcribed = ""
-
-
-
-import cv2
-import os
-from transformers import BlipProcessor, BlipForConditionalGeneration
-from PIL import Image
-from gtts import gTTS
-from moviepy.editor import VideoFileClip, AudioFileClip
-
 def extract_frames(video_path, frames_directory, num_descriptions):
+    """Extract frames from video file."""
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         raise ValueError("Could not open the video file: Check the path or file format.")
@@ -124,9 +111,8 @@ def extract_frames(video_path, frames_directory, num_descriptions):
     cap.release()
     return frame_rate
 
-
-##generate every four frames
 def create_srt_file(descriptions, output_srt_path, frame_rate):
+    """Create SRT file from descriptions."""
     with open(output_srt_path, 'w') as f:
         for i, description in enumerate(descriptions):
             start_time = (i) / frame_rate
@@ -138,6 +124,7 @@ def create_srt_file(descriptions, output_srt_path, frame_rate):
             f.write(f"{description}\n\n")
 
 def format_time(seconds):
+    """Format time in seconds to SRT format."""
     hours = int(seconds // 3600)
     minutes = int((seconds % 3600) // 60)
     seconds = int(seconds % 60)
@@ -145,6 +132,7 @@ def format_time(seconds):
     return f"{hours:02}:{minutes:02}:{seconds:02},{milliseconds:03}"
 
 def create_audio_from_descriptions(descriptions, text_transcribed, output_audio_path):
+    """Create audio file from descriptions and transcribed text."""
     full_descriptions = " ".join(descriptions)
     full_text = full_descriptions + text_transcribed
     summary_prompt = f"The following descriptions are for video frames, followed by transcribed text for the entire video. Paraphrase a bit to have coherence and connection between sentences, and be shorter. Do not exceed the total length of the original text ({len(full_descriptions)})!!:\n\n{full_text}"
@@ -153,12 +141,9 @@ def create_audio_from_descriptions(descriptions, text_transcribed, output_audio_
     tts = gTTS(text=summary_message.content, lang='en')
     tts.save(output_audio_path)
 
-
 def merge_audio_with_video(video_path, audio_path, output_path):
+    """Merge audio with video file."""
     video_clip = VideoFileClip(video_path)
     audio_clip = AudioFileClip(audio_path)
     video_clip = video_clip.set_audio(audio_clip)
     video_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
-
-
-# ---transcribe, if needed---

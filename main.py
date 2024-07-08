@@ -6,7 +6,7 @@ from pydub import AudioSegment
 import uuid
 import tempfile
 import subprocess
-from another_trial import (
+from utils import (
     extract_frames, get_image_information, create_srt_file, 
     extract_audio_from_video, transcribe_audio, 
     create_audio_from_descriptions, merge_audio_with_video
@@ -25,7 +25,7 @@ with st.sidebar:
     ### ListenIn
     ListenIn is an AI-powered tool that allows you to upload a video file and get a detailed summary of its content, including transcriptions and scene descriptions. Simply upload your video, and let ListenIn do the rest!
     """)
- 
+
 # Create temporary directories
 temp_dir = tempfile.TemporaryDirectory()
 frames_directory = os.path.join(temp_dir.name, "uploaded_frames")
